@@ -59,30 +59,35 @@ def read_text(message):
             print("Cannot contain only numbers.")
             continue
 
+        valid = True
         for c in text:
             if not (c.isalpha() or c.isdigit() or c.isspace()):
-                print("Invalid format. Only letters, numbers, and spaces.")
+                valid = False
                 break
-        else:
-            return text
+
+        if not valid:
+            print("Invalid format. Only letters, numbers, and spaces.")
+            continue
+
+        return text
 
 
 def get_product_data():
     return {
         "id": read_positive_int("ID: "),
-        "nombre": read_text("Name: "),
-        "Precio": read_float("Price: "),
-        "categoria": read_text("Category: "),
-        "cantidad": read_positive_int("Stock: "),
+        "name": read_text("Name: "),
+        "price": read_float("Price: "),
+        "category": read_text("Category: "),
+        "stock": read_positive_int("Stock: "),
     }
 
 
 def get_update_data():
     return {
-        "nombre": read_text("Name: "),
-        "Precio": read_float("Price: "),
-        "categoria": read_text("Category: "),
-        "cantidad": read_positive_int("Stock: "),
+        "name": read_text("Name: "),
+        "price": read_float("Price: "),
+        "category": read_text("Category: "),
+        "stock": read_positive_int("Stock: "),
     }
 
 
@@ -98,36 +103,57 @@ if __name__ == "__main__":
 
         elif option == "2":
             products = read_products()
-            print(products if products else "No products found.")
+            if products:
+                for p in products:
+                    print(p)
+            else:
+                print("No products found.")
 
         elif option == "3":
-            product_id = int(input("Enter ID to update: "))
-            print(
-                "Updated."
-                if update_product(product_id, "id", get_update_data())
-                else "Not found."
-            )
+            try:
+                product_id = int(input("Enter ID to update: "))
+                if product_id <= 0:
+                    print("ID must be positive.")
+                    continue
+                updated = update_product(product_id, "id", get_update_data())
+                print("Updated." if updated else "Not found.")
+            except ValueError:
+                print("Invalid ID.")
 
         elif option == "4":
             mode = input("(1) Delete by ID or (2) by name: ")
 
             if mode == "1":
-                product_id = int(input("ID: "))
-                print("Deleted." if delete_product(product_id, "id") else "Not found.")
-            else:
-                name = input("Name: ")
+                try:
+                    product_id = int(input("ID: "))
+                    if product_id <= 0:
+                        print("ID must be positive.")
+                        continue
+                    print("Deleted." if delete_product(product_id, "id") else "Not found.")
+                except ValueError:
+                    print("Invalid ID.")
+
+            elif mode == "2":
+                name = input("Name: ").strip()
                 print("Deleted." if delete_product_by_name(name) else "Not found.")
 
         elif option == "5":
             mode = input("(1) ID or (2) Name: ")
 
             if mode == "1":
-                print(find_product_by_id(int(input("ID: "))) or "Not found.")
+                try:
+                    print(find_product_by_id(int(input("ID: "))) or "Not found.")
+                except ValueError:
+                    print("Invalid ID.")
             else:
                 print(find_product_by_name(input("Name: ")) or "No results.")
 
         elif option == "6":
+            print("Goodbye!")
             break
 
         elif option == "7":
             alert_low_stock()
+
+        else:
+            print("Invalid option.")
